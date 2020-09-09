@@ -5,6 +5,9 @@
 			"referenceName": "LS_ADLS_ScraperData",
 			"type": "LinkedServiceReference"
 		},
+		"folder": {
+			"name": "IGUAZU"
+		},
 		"annotations": [],
 		"type": "DelimitedText",
 		"typeProperties": {
