@@ -1,0 +1,41 @@
+{
+	"name": "DS_Ztech_Scraping_Source_Folder",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "LS_ABS_ScraperData",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"fileSystem": {
+				"type": "string"
+			},
+			"directory": {
+				"type": "string"
+			}
+		},
+		"folder": {
+			"name": "IGUAZU"
+		},
+		"annotations": [],
+		"type": "DelimitedText",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobStorageLocation",
+				"folderPath": {
+					"value": "@dataset().directory",
+					"type": "Expression"
+				},
+				"container": {
+					"value": "@dataset().fileSystem",
+					"type": "Expression"
+				}
+			},
+			"columnDelimiter": ",",
+			"escapeChar": "\"",
+			"firstRowAsHeader": true,
+			"quoteChar": "\""
+		},
+		"schema": []
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

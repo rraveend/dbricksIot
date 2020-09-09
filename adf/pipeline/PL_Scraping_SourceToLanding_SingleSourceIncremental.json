@@ -1,0 +1,214 @@
+{
+	"name": "PL_Scraping_SourceToLanding_SingleSourceIncremental",
+	"properties": {
+		"activities": [
+			{
+				"name": "GetScrapingFilesMetaData",
+				"type": "GetMetadata",
+				"dependsOn": [
+					{
+						"activity": "ValidateIfdirectoryExists",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataset": {
+						"referenceName": "DS_Ztech_Scraping_Source_Folder",
+						"type": "DatasetReference",
+						"parameters": {
+							"fileSystem": {
+								"value": "@pipeline().parameters.sourcefileSystemScraping",
+								"type": "Expression"
+							},
+							"directory": {
+								"value": "@concat(pipeline().parameters.sourceDirectoryScraping,'/',pipeline().parameters.SourceName,'/',formatDateTime(pipeline().parameters.copyDate,'yyyy'),'/',string(int(formatDateTime(pipeline().parameters.copyDate,'MM'))),'/',string(int(formatDateTime(pipeline().parameters.copyDate,'dd'))))",
+								"type": "Expression"
+							}
+						}
+					},
+					"fieldList": [
+						"itemName",
+						"childItems",
+						"lastModified",
+						"itemType",
+						"exists"
+					],
+					"storeSettings": {
+						"type": "AzureBlobStorageReadSettings",
+						"recursive": true
+					},
+					"formatSettings": {
+						"type": "DelimitedTextReadSettings"
+					}
+				}
+			},
+			{
+				"name": "CopySourcetoRaw",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "GetScrapingFilesMetaData",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('GetScrapingFilesMetaData').output.childItems",
+						"type": "Expression"
+					},
+					"activities": [
+						{
+							"name": "CopyScrapingData",
+							"type": "Copy",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "DelimitedTextSource",
+									"storeSettings": {
+										"type": "AzureBlobStorageReadSettings",
+										"recursive": true,
+										"wildcardFileName": "*"
+									},
+									"formatSettings": {
+										"type": "DelimitedTextReadSettings"
+									}
+								},
+								"sink": {
+									"type": "DelimitedTextSink",
+									"storeSettings": {
+										"type": "AzureBlobFSWriteSettings",
+										"copyBehavior": "MergeFiles"
+									},
+									"formatSettings": {
+										"type": "DelimitedTextWriteSettings",
+										"quoteAllText": true,
+										"fileExtension": ".gz"
+									}
+								},
+								"enableStaging": false,
+								"translator": {
+									"type": "TabularTranslator",
+									"typeConversion": true,
+									"typeConversionSettings": {
+										"allowDataTruncation": true,
+										"treatBooleanAsNumber": false
+									}
+								}
+							},
+							"inputs": [
+								{
+									"referenceName": "DS_Ztech_Scraping_Source_Folder",
+									"type": "DatasetReference",
+									"parameters": {
+										"fileSystem": {
+											"value": "@pipeline().parameters.sourcefileSystemScraping",
+											"type": "Expression"
+										},
+										"directory": {
+											"value": "@concat(pipeline().parameters.sourceDirectoryScraping,'/',pipeline().parameters.SourceName,'/',formatDateTime(pipeline().parameters.copyDate,'yyyy'),'/',string(int(formatDateTime(pipeline().parameters.copyDate,'MM'))),'/',string(int(formatDateTime(pipeline().parameters.copyDate,'dd'))),'/',item().name)",
+											"type": "Expression"
+										}
+									}
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "DS_Iguazu_Scraping_Landing_Csv",
+									"type": "DatasetReference",
+									"parameters": {
+										"fileSystem": {
+											"value": "@pipeline().parameters.sinkfileSystemScraping",
+											"type": "Expression"
+										},
+										"directory": {
+											"value": "@concat(pipeline().parameters.sinkDirectoryScraping,'/',pipeline().parameters.SourceName)",
+											"type": "Expression"
+										},
+										"fileName": {
+											"value": "@concat(pipeline().parameters.SourceName,'_',formatDateTime(pipeline().parameters.copyDate,'yyyy'),'-',formatDateTime(pipeline().parameters.copyDate,'MM'),'-',formatDateTime(pipeline().parameters.copyDate,'dd'),'_',item().name,':00:00.gz')",
+											"type": "Expression"
+										}
+									}
+								}
+							]
+						}
+					]
+				}
+			},
+			{
+				"name": "ValidateIfdirectoryExists",
+				"type": "Validation",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"dataset": {
+						"referenceName": "DS_Ztech_Scraping_Source_Folder",
+						"type": "DatasetReference",
+						"parameters": {
+							"fileSystem": "@pipeline().parameters.sourcefileSystemScraping",
+							"directory": {
+								"value": "@concat(pipeline().parameters.sourceDirectoryScraping,'/',pipeline().parameters.SourceName,'/',formatDateTime(pipeline().parameters.copyDate,'yyyy'),'/',string(int(formatDateTime(pipeline().parameters.copyDate,'MM'))),'/',string(int(formatDateTime(pipeline().parameters.copyDate,'dd'))))",
+								"type": "Expression"
+							}
+						}
+					},
+					"timeout": "0.00:01:00",
+					"sleep": 10
+				}
+			}
+		],
+		"parameters": {
+			"sourcefileSystemScraping": {
+				"type": "string",
+				"defaultValue": "ztech"
+			},
+			"sourcedirectoryScraping": {
+				"type": "string",
+				"defaultValue": "raw/scraping"
+			},
+			"sinkDirectoryScraping": {
+				"type": "string",
+				"defaultValue": "mimercado_landing/price_scraping"
+			},
+			"copyDate": {
+				"type": "string",
+				"defaultValue": "09/07/2020"
+			},
+			"sinkfileSystemScraping": {
+				"type": "string",
+				"defaultValue": "iguazu-datalake-landing"
+			},
+			"SourceName": {
+				"type": "string",
+				"defaultValue": "amazon"
+			}
+		},
+		"folder": {
+			"name": "IGUAZU/Scraping"
+		},
+		"annotations": [],
+		"lastPublishTime": "2020-09-09T12:01:42Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

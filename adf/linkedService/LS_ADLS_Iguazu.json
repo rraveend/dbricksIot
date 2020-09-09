@@ -1,0 +1,19 @@
+{
+	"name": "LS_ADLS_Iguazu",
+	"type": "Microsoft.DataFactory/factories/linkedservices",
+	"properties": {
+		"annotations": [],
+		"type": "AzureBlobFS",
+		"typeProperties": {
+			"url": "https://iguazu.dfs.core.windows.net",
+			"accountKey": {
+				"type": "AzureKeyVaultSecret",
+				"store": {
+					"referenceName": "adb_keyvaultdelta",
+					"type": "LinkedServiceReference"
+				},
+				"secretName": "ADLSIguazuAccountKey"
+			}
+		}
+	}
+}

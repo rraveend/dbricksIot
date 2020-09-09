@@ -1,0 +1,13 @@
+{
+	"name": "LS_SQL_MarketPlace",
+	"type": "Microsoft.DataFactory/factories/linkedservices",
+	"properties": {
+		"description": "ztech-db-marketplace on ztech-dbserver",
+		"annotations": [],
+		"type": "AzureSqlDatabase",
+		"typeProperties": {
+			"connectionString": "server=tcp:ztech-dbserver.database.windows.net,1433;initial catalog=ztech-db-marketplace;persist security info=False;user id=dbadmin;multipleactiveresultsets=False;encrypt=True;trustservercertificate=False;connection timeout=30",
+			"encryptedCredential": "ew0KICAiVmVyc2lvbiI6ICIyMDE3LTExLTMwIiwNCiAgIlByb3RlY3Rpb25Nb2RlIjogIktleSIsDQogICJTZWNyZXRDb250ZW50VHlwZSI6ICJQbGFpbnRleHQiLA0KICAiQ3JlZGVudGlhbElkIjogIlpURUNILUFERi1JR1VBWlVfMDE3ODQxNjQtM2MyMi00MDZmLTljNmEtYTk3YmYzMzMyYTA3Ig0KfQ=="
+		}
+	}
+}

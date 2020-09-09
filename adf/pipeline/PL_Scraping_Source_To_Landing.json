@@ -1,0 +1,143 @@
+{
+	"name": "PL_Scraping_Source_To_Landing",
+	"properties": {
+		"activities": [
+			{
+				"name": "CopyNewFile",
+				"type": "Copy",
+				"dependsOn": [
+					{
+						"activity": "SplitSourceDirectory",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "DelimitedTextSource",
+						"storeSettings": {
+							"type": "AzureBlobStorageReadSettings",
+							"recursive": false
+						},
+						"formatSettings": {
+							"type": "DelimitedTextReadSettings"
+						}
+					},
+					"sink": {
+						"type": "DelimitedTextSink",
+						"storeSettings": {
+							"type": "AzureBlobFSWriteSettings"
+						},
+						"formatSettings": {
+							"type": "DelimitedTextWriteSettings",
+							"quoteAllText": true,
+							"fileExtension": ".txt"
+						}
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
+						}
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "DS_Ztech_Scraping_Source_csv",
+						"type": "DatasetReference",
+						"parameters": {
+							"directory": {
+								"value": "@replace(pipeline().parameters.sourcedirectoryScraping,concat(pipeline().parameters.sourcefileSystemScraping,'/'),'')",
+								"type": "Expression"
+							},
+							"fileName": {
+								"value": "@pipeline().parameters.sourceFileName",
+								"type": "Expression"
+							},
+							"fileSystem": {
+								"value": "@pipeline().parameters.sourcefileSystemScraping",
+								"type": "Expression"
+							}
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "DS_Iguazu_Scraping_Landing_Csv",
+						"type": "DatasetReference",
+						"parameters": {
+							"fileSystem": {
+								"value": "@pipeline().parameters.sinkfileSystemScraping",
+								"type": "Expression"
+							},
+							"directory": {
+								"value": "@concat(pipeline().parameters.sinkDirectoryScraping,'/',variables('SourceFileArray')[3])",
+								"type": "Expression"
+							},
+							"fileName": {
+								"value": "@concat(variables('SourceFileArray')[3],'_',variables('SourceFileArray')[4],'-',variables('SourceFileArray')[5],'-',variables('SourceFileArray')[6],'_',variables('SourceFileArray')[7],':00:00.gz')",
+								"type": "Expression"
+							}
+						}
+					}
+				]
+			},
+			{
+				"name": "SplitSourceDirectory",
+				"type": "SetVariable",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "SourceFileArray",
+					"value": {
+						"value": "@split(pipeline().parameters.sourcedirectoryScraping,'/')",
+						"type": "Expression"
+					}
+				}
+			}
+		],
+		"parameters": {
+			"sourcefileSystemScraping": {
+				"type": "string",
+				"defaultValue": "ztech"
+			},
+			"sourcedirectoryScraping": {
+				"type": "string"
+			},
+			"sinkDirectoryScraping": {
+				"type": "string",
+				"defaultValue": "mimercado_landing/price_scraping"
+			},
+			"sourceFileName": {
+				"type": "string"
+			},
+			"sinkfileSystemScraping": {
+				"type": "string",
+				"defaultValue": "iguazu-datalake-landing"
+			}
+		},
+		"variables": {
+			"SourceFileArray": {
+				"type": "Array"
+			}
+		},
+		"folder": {
+			"name": "IGUAZU/Scraping"
+		},
+		"annotations": [],
+		"lastPublishTime": "2020-09-09T12:01:44Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

@@ -1,0 +1,158 @@
+{
+	"name": "PL_Scraping_SourceToLanding_Historical",
+	"properties": {
+		"activities": [
+			{
+				"name": "LoopSourcesForallDates",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "FilterCompetitor",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('FilterCompetitor').output.Value",
+						"type": "Expression"
+					},
+					"isSequential": false,
+					"batchCount": 10,
+					"activities": [
+						{
+							"name": "Execute PL_Scraping_SourceToRaw_SingleSourceIncremental",
+							"type": "ExecutePipeline",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "PL_Scraping_SourceToLanding_SingleSourceIncremental",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true,
+								"parameters": {
+									"sourcefileSystemScraping": {
+										"value": "@pipeline().parameters.sourcefileSystemScraping",
+										"type": "Expression"
+									},
+									"sourcedirectoryScraping": {
+										"value": "@pipeline().parameters.sourcedirectoryScraping",
+										"type": "Expression"
+									},
+									"sinkDirectoryScraping": {
+										"value": "@pipeline().parameters.sinkDirectoryScraping",
+										"type": "Expression"
+									},
+									"copyDate": {
+										"value": "@item().CopyDate",
+										"type": "Expression"
+									},
+									"sinkfileSystemScraping": {
+										"value": "@pipeline().parameters.sinkfileSystemScraping",
+										"type": "Expression"
+									},
+									"SourceName": {
+										"value": "@item().SourceName",
+										"type": "Expression"
+									}
+								}
+							}
+						}
+					]
+				}
+			},
+			{
+				"name": "LookupScrapingDataConfigFile",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "DelimitedTextSource",
+						"storeSettings": {
+							"type": "AzureBlobFSReadSettings",
+							"recursive": true
+						},
+						"formatSettings": {
+							"type": "DelimitedTextReadSettings"
+						}
+					},
+					"dataset": {
+						"referenceName": "DS_ScrapingDataCofigFile_Csv",
+						"type": "DatasetReference"
+					},
+					"firstRowOnly": false
+				}
+			},
+			{
+				"name": "FilterCompetitor",
+				"type": "Filter",
+				"dependsOn": [
+					{
+						"activity": "LookupScrapingDataConfigFile",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('LookupScrapingDataConfigFile').output.Value",
+						"type": "Expression"
+					},
+					"condition": {
+						"value": "@equals(item().SourceName, pipeline().parameters.SourceName)",
+						"type": "Expression"
+					}
+				}
+			}
+		],
+		"parameters": {
+			"sourcefileSystemScraping": {
+				"type": "string",
+				"defaultValue": "ztech"
+			},
+			"sourcedirectoryScraping": {
+				"type": "string",
+				"defaultValue": "raw/scraping"
+			},
+			"sinkDirectoryScraping": {
+				"type": "string",
+				"defaultValue": "mimercado_landing/price_scraping"
+			},
+			"copyDate": {
+				"type": "string",
+				"defaultValue": "09/07/2020"
+			},
+			"sinkfileSystemScraping": {
+				"type": "string",
+				"defaultValue": "iguazu-datalake-landing"
+			},
+			"SourceName": {
+				"type": "string"
+			}
+		},
+		"variables": {
+			"ConfigFolderList": {
+				"type": "Array"
+			}
+		},
+		"folder": {
+			"name": "IGUAZU/Scraping"
+		},
+		"annotations": [],
+		"lastPublishTime": "2020-09-09T12:01:44Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

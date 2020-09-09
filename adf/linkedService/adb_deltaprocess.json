@@ -1,0 +1,20 @@
+{
+	"name": "adb_deltaprocess",
+	"type": "Microsoft.DataFactory/factories/linkedservices",
+	"properties": {
+		"annotations": [],
+		"type": "AzureDatabricks",
+		"typeProperties": {
+			"domain": "https://adb-5472205346154223.3.azuredatabricks.net",
+			"accessToken": {
+				"type": "AzureKeyVaultSecret",
+				"store": {
+					"referenceName": "adb_keyvaultdelta",
+					"type": "LinkedServiceReference"
+				},
+				"secretName": "ztech-db-keyvault"
+			},
+			"existingClusterId": "0624-110821-gangs591"
+		}
+	}
+}

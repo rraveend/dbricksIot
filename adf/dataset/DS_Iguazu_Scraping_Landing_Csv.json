@@ -1,0 +1,49 @@
+{
+	"name": "DS_Iguazu_Scraping_Landing_Csv",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "LS_ADLS_Iguazu",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"fileSystem": {
+				"type": "string"
+			},
+			"directory": {
+				"type": "string"
+			},
+			"fileName": {
+				"type": "string"
+			}
+		},
+		"folder": {
+			"name": "IGUAZU"
+		},
+		"annotations": [],
+		"type": "DelimitedText",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"fileName": {
+					"value": "@dataset().fileName",
+					"type": "Expression"
+				},
+				"folderPath": {
+					"value": "@dataset().directory",
+					"type": "Expression"
+				},
+				"fileSystem": {
+					"value": "@dataset().fileSystem",
+					"type": "Expression"
+				}
+			},
+			"columnDelimiter": ",",
+			"compressionCodec": "gzip",
+			"escapeChar": "\\",
+			"firstRowAsHeader": true,
+			"quoteChar": "\""
+		},
+		"schema": []
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

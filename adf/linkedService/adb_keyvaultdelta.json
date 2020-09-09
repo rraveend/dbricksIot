@@ -1,0 +1,11 @@
+{
+	"name": "adb_keyvaultdelta",
+	"type": "Microsoft.DataFactory/factories/linkedservices",
+	"properties": {
+		"annotations": [],
+		"type": "AzureKeyVault",
+		"typeProperties": {
+			"baseUrl": "https://ztech-keyvault-delta.vault.azure.net/"
+		}
+	}
+}
